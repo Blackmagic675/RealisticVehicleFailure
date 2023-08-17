@@ -1,16 +1,3 @@
-------------------------------------------
---	iEnsomatic RealisticVehicleFailure  --
-------------------------------------------
---
---	Created by Jens Sandalgaard
---      FIXED by Hyperz#0001 ( https://github.com/Itz-Hyperz/RealisticVehicleFailure-FIXED )
---
---	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
---
---	https://github.com/iEns/RealisticVehicleFailure
---
-
-
 local pedInSameVehicleLast=false
 local vehicle
 local lastVehicle
@@ -21,29 +8,24 @@ local fEngineDamageMult = 0.0
 local fBrakeForce = 1.0
 local isBrakingForward = false
 local isBrakingReverse = false
-
 local healthEngineLast = 1000.0
 local healthEngineCurrent = 1000.0
 local healthEngineNew = 1000.0
 local healthEngineDelta = 0.0
 local healthEngineDeltaScaled = 0.0
-
 local healthBodyLast = 1000.0
 local healthBodyCurrent = 1000.0
 local healthBodyNew = 1000.0
 local healthBodyDelta = 0.0
 local healthBodyDeltaScaled = 0.0
-
 local healthPetrolTankLast = 1000.0
 local healthPetrolTankCurrent = 1000.0
 local healthPetrolTankNew = 1000.0
 local healthPetrolTankDelta = 0.0
 local healthPetrolTankDeltaScaled = 0.0
 local tireBurstLuckyNumber
-
-math.randomseed(GetGameTimer());
-
 local tireBurstMaxNumber = cfg.randomTireBurstInterval * 1200; 												-- the tire burst lottery runs roughly 1200 times per minute
+
 if cfg.randomTireBurstInterval ~= 0 then tireBurstLuckyNumber = math.random(tireBurstMaxNumber) end			-- If we hit this number again randomly, a tire will burst.
 
 local function isPedDrivingAVehicle()
@@ -108,8 +90,6 @@ local function fscale(inputValue, originalMin, originalMax, newBegin, newEnd, cu
 	return rangedValue
 end
 
-
-
 local function tireBurstLottery()
 	local tireBurstNumber = math.random(tireBurstMaxNumber)
 	if tireBurstNumber == tireBurstLuckyNumber then
@@ -118,24 +98,24 @@ local function tireBurstLottery()
 		local numWheels = GetVehicleNumberOfWheels(vehicle)
 		local affectedTire
 		if numWheels == 2 then
-			affectedTire = (math.random(2)-1)*4		-- wheel 0 or 4
+			affectedTire = (math.random(2) - 1) * 4 -- wheel 0 or 4
 		elseif numWheels == 4 then
-			affectedTire = (math.random(4)-1)
-			if affectedTire > 1 then affectedTire = affectedTire + 2 end	-- 0, 1, 4, 5
+			affectedTire = (math.random(4) - 1)
+			if affectedTire > 1 then affectedTire = affectedTire + 2 end -- 0, 1, 4, 5
 		elseif numWheels == 6 then
-			affectedTire = (math.random(6)-1)
+			affectedTire = (math.random(6) - 1)
 		else
 			affectedTire = 0
 		end
 		SetVehicleTyreBurst(vehicle, affectedTire, false, 1000.0)
-		tireBurstLuckyNumber = math.random(tireBurstMaxNumber)			-- Select a new number to hit, just in case some numbers occur more often than others
+		tireBurstLuckyNumber = math.random(tireBurstMaxNumber) -- Select a new number to hit, just in case some numbers occur more often than others
 	end
 end
 
 if cfg.torqueMultiplierEnabled or cfg.preventVehicleFlip or cfg.limpMode then
-	Citizen.CreateThread(function()
+	CreateThread(function()
 		while true do
-			Citizen.Wait(0)
+			Wait(0)
 			if cfg.torqueMultiplierEnabled or cfg.sundayDriver or cfg.limpMode then
 				if pedInSameVehicleLast then
 					local factor = 1.0
@@ -170,7 +150,7 @@ if cfg.torqueMultiplierEnabled or cfg.preventVehicleFlip or cfg.limpMode then
 							if accelerator > 127 then
 								-- Reversing and braking (Using the accelerator)
 								isBrakingReverse = true
-								brk = fscale(accelerator, 127.0, 254.0, 0.01, fBrakeForce, 10.0-(cfg.sundayDriverBrakeCurve*2.0))
+								brk = fscale(accelerator, 127.0, 254.0, 0.01, fBrakeForce, 10.0 - (cfg.sundayDriverBrakeCurve * 2.0))
 							end
 						else
 							-- Stopped or almost stopped or sliding sideways
@@ -179,23 +159,23 @@ if cfg.torqueMultiplierEnabled or cfg.preventVehicleFlip or cfg.limpMode then
 								-- Not sliding sideways
 								if isBrakingForward == true then
 									--Stopped or going slightly forward while braking
-									DisableControlAction(2,72,true) -- Disable Brake until user lets go of brake
-									SetVehicleForwardSpeed(vehicle,speed*0.98)
-									SetVehicleBrakeLights(vehicle,true)
+									DisableControlAction(2, 72, true) -- Disable Brake until user lets go of brake
+									SetVehicleForwardSpeed(vehicle, speed * 0.98)
+									SetVehicleBrakeLights(vehicle, true)
 								end
 								if isBrakingReverse == true then
 									--Stopped or going slightly in reverse while braking
-									DisableControlAction(2,71,true) -- Disable reverse Brake until user lets go of reverse brake (Accelerator)
+									DisableControlAction(2, 71, true) -- Disable reverse Brake until user lets go of reverse brake (Accelerator)
 									SetVehicleForwardSpeed(vehicle,speed*0.98)
 									SetVehicleBrakeLights(vehicle,true)
 								end
-								if isBrakingForward == true and GetDisabledControlNormal(2,72) == 0 then
+								if isBrakingForward == true and GetDisabledControlNormal(2, 72) == 0 then
 									-- We let go of the brake
-									isBrakingForward=false
+									isBrakingForward = false
 								end
-								if isBrakingReverse == true and GetDisabledControlNormal(2,71) == 0 then
+								if isBrakingReverse == true and GetDisabledControlNormal(2, 71) == 0 then
 									-- We let go of the reverse brake (Accelerator)
-									isBrakingReverse=false
+									isBrakingReverse = false
 								end
 							end
 						end
@@ -216,17 +196,17 @@ if cfg.torqueMultiplierEnabled or cfg.preventVehicleFlip or cfg.limpMode then
 			if cfg.preventVehicleFlip then
 				local roll = GetEntityRoll(vehicle)
 				if (roll > 75.0 or roll < -75.0) and GetEntitySpeed(vehicle) < 2 then
-					DisableControlAction(2,59,true) -- Disable left/right
-					DisableControlAction(2,60,true) -- Disable up/down
+					DisableControlAction(2, 59, true) -- Disable left/right
+					DisableControlAction(2, 60, true) -- Disable up/down
 				end
 			end
 		end
 	end)
 end
 
-Citizen.CreateThread(function()
+CreateThread(function()
 	while true do
-		Citizen.Wait(50)
+		Wait(50)
 		local ped = GetPlayerPed(-1)
 		if isPedDrivingAVehicle() then
 			vehicle = GetVehiclePedIsIn(ped, false)
@@ -259,6 +239,8 @@ Citizen.CreateThread(function()
 			end
 
 			if healthEngineCurrent <= cfg.engineSafeGuard+1 and cfg.limpMode == false then
+				local vehpos = GetEntityCoords(vehicle)
+                StartParticleFxLoopedAtCoord("ent_ray_heli_aprtmnt_l_fire", vehpos.x, vehpos.y, vehpos.z-0.7, 0.0, 0.0, 0.0, 1.0, false, false, false, false)
 				SetVehicleUndriveable(vehicle,true)
 			end
 
@@ -376,4 +358,3 @@ Citizen.CreateThread(function()
 		end
 	end
 end)
-
